@@ -141,7 +141,7 @@ bash ../../scripts/sync-web-sdk.sh check
 ## Server-Side Setup (Go)
 
 ```go
-import "github.com/Organic-Programming/go-holons/pkg/transport"
+import "github.com/organic-programming/go-holons/pkg/transport"
 
 bridge := transport.NewWebBridge()
 bridge.Register("hello.v1.HelloService/Greet", greetHandler)
