@@ -1,0 +1,33 @@
+{
+  "capabilities": {
+    "bidirectional": true,
+    "grpc_dial_stdio": true,
+    "grpc_dial_tcp": true,
+    "grpc_dial_unix": true,
+    "grpc_dial_ws": false,
+    "grpc_listen_mem": false,
+    "grpc_listen_stdio": false,
+    "grpc_listen_tcp": false,
+    "grpc_listen_unix": false,
+    "holon_rpc_client": true,
+    "holon_rpc_server": true,
+    "routing": [
+      "unicast"
+    ],
+    "valence": "mono"
+  },
+  "executables": {
+    "echo_client": "node ./cmd/echo-client.mjs",
+    "echo_server": "node ./cmd/echo-server.mjs"
+  },
+  "lang": "javascript",
+  "last_certified": {
+    "commit": "8edea2a4f5bc760b7721df249e83552ae2e8b38e",
+    "date": "2026-02-16",
+    "level": 5
+  },
+  "profile": "browser",
+  "role": "client",
+  "sdk": "js-web-holons",
+  "version": "0.1.0"
+}
