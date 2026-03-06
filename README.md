@@ -1,17 +1,3 @@
----
-# Cartouche v1
-title: "js-web-holons — Browser SDK for Organic Programming"
-author:
-  name: "B. ALTER"
-  copyright: "© 2026 Benoit Pereira da Silva"
-created: 2026-02-12
-revised: 2026-02-12
-lang: en-US
-access:
-  humans: true
-  agents: true
-status: draft
----
 # js-web-holons
 
 **Browser-side Holon-RPC client plus a Node test/server harness.**

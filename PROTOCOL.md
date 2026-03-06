@@ -1,17 +1,3 @@
----
-# Cartouche v1
-title: "Holon-RPC Protocol Specification"
-author:
-  name: "B. ALTER"
-  copyright: "© 2026 Benoit Pereira da Silva"
-created: 2026-02-12
-revised: 2026-02-13
-lang: en-US
-access:
-  humans: true
-  agents: true
-status: draft
----
 # Holon-RPC Protocol (js-web-holons)
 
 This document specifies the JSON envelope protocol used between:
