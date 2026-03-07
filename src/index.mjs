@@ -16,6 +16,8 @@
  * @module js-web-holons
  */
 
+export { discoverFromManifest, findBySlug } from "./discover.mjs";
+
 const DEFAULTS = Object.freeze({
     defaultTimeoutMs: 30000,
     connectTimeoutMs: 10000,
