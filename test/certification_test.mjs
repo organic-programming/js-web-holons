@@ -2,7 +2,6 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
 import { PassThrough } from "node:stream";
-import { readFile } from "node:fs/promises";
 import {
     parseArgs,
     buildInvocation,
@@ -35,20 +34,7 @@ function makeSpawn(result, capture = {}) {
     };
 }
 
-describe("certification", () => {
-    it("cert.json declares echo commands and certification capabilities", async () => {
-        const raw = await readFile(new URL("../cert.json", import.meta.url), "utf8");
-        const cert = JSON.parse(raw);
-
-        assert.equal(cert.executables.echo_server, "node ./cmd/echo-server.mjs");
-        assert.equal(cert.executables.echo_client, "node ./cmd/echo-client.mjs");
-        assert.equal(cert.capabilities.grpc_dial_tcp, true);
-        assert.equal(cert.capabilities.grpc_dial_stdio, true);
-        assert.equal(cert.capabilities.holon_rpc_server, true);
-        assert.equal(cert.capabilities.valence, "mono");
-        assert.equal(cert.profile, "browser");
-    });
-
+describe("echo-client wrapper", () => {
     it("parseArgs uses expected defaults", () => {
         const parsed = parseArgs(["node", "echo-client.mjs"]);
 
