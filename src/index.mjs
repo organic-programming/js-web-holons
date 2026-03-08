@@ -17,6 +17,7 @@
  */
 
 export { discoverFromManifest, findBySlug } from "./discover.mjs";
+export * as describe from "./describe.mjs";
 
 const DEFAULTS = Object.freeze({
     defaultTimeoutMs: 30000,
