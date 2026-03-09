@@ -16,7 +16,7 @@ export class GrpcWebClient {
 
     constructor(baseUrl, options = {}) {
         this.#baseUrl = normalizeBaseUrl(baseUrl);
-        this.#fetch = options.fetch ?? globalThis.fetch;
+        this.#fetch = options.fetch ?? defaultFetch();
         if (typeof this.#fetch !== "function") {
             throw new Error("fetch implementation required");
         }
@@ -124,6 +124,13 @@ export function disconnect(client) {
     if (typeof client.close === "function") {
         client.close();
     }
+}
+
+function defaultFetch() {
+    if (typeof globalThis.fetch !== "function") {
+        return undefined;
+    }
+    return globalThis.fetch.bind(globalThis);
 }
 
 function normalizeTarget(hostPort) {
