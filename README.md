@@ -13,7 +13,7 @@ provide a process-launching `connect()` helper in the browser.
 import { discoverFromManifest, findBySlug } from "./src/index.mjs";
 
 const entries = await discoverFromManifest("/holon.yaml");
-const entry = findBySlug(entries, "atlas-daemon");
+const entry = findBySlug(entries, "rob-go");
 ```
 
 - `discoverFromManifest(url, options?)` fetches a remote `holon.yaml` or
