@@ -1,84 +1,4 @@
-function sanitizeValue(raw) {
-    let value = String(raw || "").trim();
-    const hash = value.indexOf("#");
-    if (hash >= 0) {
-        value = value.slice(0, hash).trim();
-    }
-    if (value.startsWith('"') && value.endsWith('"') && value.length >= 2) {
-        value = value.slice(1, -1);
-    }
-    return value;
-}
-
-function parseManifestText(text, sourceURL) {
-    let sawMapping = false;
-    let section = "";
-    const identity = {
-        uuid: "",
-        given_name: "",
-        family_name: "",
-        motto: "",
-        composer: "",
-        clade: "",
-        status: "",
-        born: "",
-        lang: "",
-        parents: [],
-        reproduction: "",
-        generated_by: "",
-        proto_status: "",
-        aliases: [],
-    };
-    const manifest = {
-        kind: "",
-        build: { runner: "", main: "" },
-        artifacts: { binary: "", primary: "" },
-    };
-
-    for (const line of text.split(/\r?\n/)) {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith("#")) {
-            continue;
-        }
-        const colon = trimmed.indexOf(":");
-        if (colon < 0) {
-            continue;
-        }
-
-        sawMapping = true;
-        const indent = line.match(/^[ \t]*/)?.[0].length ?? 0;
-        const key = trimmed.slice(0, colon).trim();
-        const value = sanitizeValue(trimmed.slice(colon + 1));
-
-        if (indent === 0) {
-            if ((key === "build" || key === "artifacts") && value === "") {
-                section = key;
-            } else {
-                section = "";
-                if (key in identity) {
-                    identity[key] = value;
-                } else if (key === "kind") {
-                    manifest.kind = value;
-                }
-            }
-            continue;
-        }
-
-        if (section === "build") {
-            if (key === "runner") manifest.build.runner = value;
-            if (key === "main") manifest.build.main = value;
-        } else if (section === "artifacts") {
-            if (key === "binary") manifest.artifacts.binary = value;
-            if (key === "primary") manifest.artifacts.primary = value;
-        }
-    }
-
-    if (!sawMapping) {
-        throw new Error(`${sourceURL}: holon.yaml must be a YAML mapping`);
-    }
-
-    return { identity, manifest };
-}
+import { parseManifestText } from "./manifest.mjs";
 
 function slugFor(identity) {
     const given = String(identity.given_name || "").trim();
@@ -103,7 +23,11 @@ function toEntry(document, sourceURL) {
         relative_path: relativePath,
         origin: "remote",
         identity: document.identity,
-        manifest: document.manifest,
+        manifest: {
+            kind: document.kind || "",
+            build: document.build || { runner: "", main: "" },
+            artifacts: document.artifacts || { binary: "", primary: "" },
+        },
     };
 }
 
@@ -115,7 +39,7 @@ export async function discoverFromManifest(url, options = {}) {
 
     const response = await fetchImpl(url, {
         headers: {
-            Accept: "application/yaml, text/yaml, text/plain, application/json",
+            Accept: "text/plain, application/octet-stream, application/json",
         },
     });
     if (!response.ok) {

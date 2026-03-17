@@ -3,6 +3,7 @@ import path from "node:path";
 import protobuf from "protobufjs";
 
 const { FieldLabel } = await import("./gen/holonmeta/v1/holonmeta.mjs");
+import { parseManifestFile, resolveManifestPath } from "./manifest.mjs";
 
 export const HOLON_META_METHOD = "holonmeta.v1.HolonMeta/Describe";
 
@@ -10,8 +11,8 @@ const FIELD_LABEL_OPTIONAL = FieldLabel.FIELD_LABEL_OPTIONAL;
 const FIELD_LABEL_REPEATED = FieldLabel.FIELD_LABEL_REPEATED;
 const FIELD_LABEL_MAP = FieldLabel.FIELD_LABEL_MAP;
 
-export function buildResponse(protoDir, holonYamlPath) {
-    const identity = parseHolon(fs.readFileSync(holonYamlPath, "utf8"), holonYamlPath);
+export function buildResponse(protoDir) {
+    const identity = parseManifestFile(resolveManifestPath(protoDir)).identity;
     const services = parseServices(protoDir);
     return {
         slug: slugFor(identity),
@@ -20,12 +21,12 @@ export function buildResponse(protoDir, holonYamlPath) {
     };
 }
 
-export function register(server, protoDir, holonYamlPath) {
+export function register(server, protoDir) {
     if (!server || typeof server.register !== "function") {
         throw new TypeError("HolonServer instance required");
     }
 
-    const response = buildResponse(protoDir, holonYamlPath);
+    const response = buildResponse(protoDir);
     server.register(HOLON_META_METHOD, async () => response);
 }
 
@@ -276,58 +277,6 @@ function parseCommentBlock(raw) {
         required,
         example: examples.join("\n"),
     };
-}
-
-function parseHolon(text, sourceURL) {
-    let sawMapping = false;
-    const identity = {
-        uuid: "",
-        given_name: "",
-        family_name: "",
-        motto: "",
-        composer: "",
-        clade: "",
-        status: "",
-        born: "",
-        lang: "",
-        parents: [],
-        reproduction: "",
-        generated_by: "",
-        proto_status: "",
-        aliases: [],
-    };
-
-    for (const line of text.split(/\r?\n/)) {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith("#")) {
-            continue;
-        }
-
-        const colon = trimmed.indexOf(":");
-        if (colon < 0) {
-            continue;
-        }
-
-        sawMapping = true;
-        const key = trimmed.slice(0, colon).trim();
-        let value = trimmed.slice(colon + 1).trim();
-        const hash = value.indexOf("#");
-        if (hash >= 0) {
-            value = value.slice(0, hash).trim();
-        }
-        if (value.startsWith('"') && value.endsWith('"') && value.length >= 2) {
-            value = value.slice(1, -1);
-        }
-        if (Object.prototype.hasOwnProperty.call(identity, key)) {
-            identity[key] = value;
-        }
-    }
-
-    if (!sawMapping) {
-        throw new Error(`${sourceURL}: holon.yaml must be a YAML mapping`);
-    }
-
-    return identity;
 }
 
 function slugFor(identity) {

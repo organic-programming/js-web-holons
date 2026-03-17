@@ -38,14 +38,27 @@ message PingResponse {
 }
 `;
 
-const HOLON_YAML = `given_name: Echo
-family_name: Server
-motto: Reply precisely.
+const HOLON_PROTO = `syntax = "proto3";
+
+package holonmeta.test.v1;
+
+option (holons.v1.manifest) = {
+  identity: {
+    uuid: "echo-server-0000"
+    given_name: "Echo"
+    family_name: "Server"
+    motto: "Reply precisely."
+    composer: "describe-test"
+    status: "draft"
+    born: "2026-03-17"
+  }
+  lang: "javascript"
+};
 `;
 
 function makeHolonDir(includeProto = true) {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "js-web-describe-"));
-    fs.writeFileSync(path.join(root, "holon.yaml"), HOLON_YAML);
+    fs.writeFileSync(path.join(root, "holon.proto"), HOLON_PROTO);
     if (includeProto) {
         const protoDir = path.join(root, "protos", "echo", "v1");
         fs.mkdirSync(protoDir, { recursive: true });
@@ -64,7 +77,6 @@ describe("describe", () => {
         try {
             const response = holonDescribe.buildResponse(
                 path.join(root, "protos"),
-                path.join(root, "holon.yaml"),
             );
 
             assert.equal(response.slug, "echo-server");
@@ -84,7 +96,7 @@ describe("describe", () => {
     it("register() exposes HolonMeta Describe on HolonServer", async () => {
         const root = makeHolonDir(true);
         const server = new HolonServer("ws://127.0.0.1:0/rpc", { maxConnections: 1 });
-        holonDescribe.register(server, path.join(root, "protos"), path.join(root, "holon.yaml"));
+        holonDescribe.register(server, path.join(root, "protos"));
 
         const uri = await server.start();
         const client = new HolonClient(uri, {
@@ -110,7 +122,6 @@ describe("describe", () => {
         try {
             const response = holonDescribe.buildResponse(
                 path.join(root, "protos"),
-                path.join(root, "holon.yaml"),
             );
 
             assert.equal(response.slug, "echo-server");

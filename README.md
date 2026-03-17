@@ -12,12 +12,12 @@ provide a process-launching `connect()` helper in the browser.
 ```js
 import { discoverFromManifest, findBySlug } from "./src/index.mjs";
 
-const entries = await discoverFromManifest("/holon.yaml");
+const entries = await discoverFromManifest("/holon.proto");
 const entry = findBySlug(entries, "rob-go");
 ```
 
-- `discoverFromManifest(url, options?)` fetches a remote `holon.yaml` or
-  JSON manifest document and normalizes it into `HolonEntry` records.
+- `discoverFromManifest(url, options?)` fetches a remote `holon.proto`
+  manifest document and normalizes it into `HolonEntry` records.
 - `findBySlug(entries, slug)` resolves a specific entry from that set.
 
 ## Holon-RPC usage
