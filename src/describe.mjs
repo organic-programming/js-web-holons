@@ -2,21 +2,20 @@ import fs from "node:fs";
 import path from "node:path";
 import protobuf from "protobufjs";
 
-const { FieldLabel } = await import("./gen/holonmeta/v1/holonmeta.mjs");
+const { FieldLabel } = await import("./gen/holons/v1/describe.mjs");
 import { parseManifestFile, resolveManifestPath } from "./manifest.mjs";
 
-export const HOLON_META_METHOD = "holonmeta.v1.HolonMeta/Describe";
+export const HOLON_META_METHOD = "holons.v1.HolonMeta/Describe";
 
 const FIELD_LABEL_OPTIONAL = FieldLabel.FIELD_LABEL_OPTIONAL;
 const FIELD_LABEL_REPEATED = FieldLabel.FIELD_LABEL_REPEATED;
 const FIELD_LABEL_MAP = FieldLabel.FIELD_LABEL_MAP;
 
 export function buildResponse(protoDir) {
-    const identity = parseManifestFile(resolveManifestPath(protoDir)).identity;
+    const resolved = parseManifestFile(resolveManifestPath(protoDir));
     const services = parseServices(protoDir);
     return {
-        slug: slugFor(identity),
-        motto: identity.motto || "",
+        manifest: protoManifest(resolved),
         services,
     };
 }
@@ -50,7 +49,7 @@ function parseServices(protoDir) {
 
     return collectServices(root)
         .filter((service) => inputFiles.has(normalizePath(service.filename)))
-        .filter((service) => trimFullName(service.fullName) !== "holonmeta.v1.HolonMeta")
+        .filter((service) => trimFullName(service.fullName) !== "holons.v1.HolonMeta")
         .map((service) => buildService(service, inputFiles));
 }
 
@@ -279,15 +278,6 @@ function parseCommentBlock(raw) {
     };
 }
 
-function slugFor(identity) {
-    const given = String(identity.given_name || "").trim();
-    const family = String(identity.family_name || "").trim().replace(/\?$/, "");
-    if (!given && !family) {
-        return "";
-    }
-    return `${given}-${family}`.trim().toLowerCase().replace(/\s+/g, "-").replace(/^-+|-+$/g, "");
-}
-
 function trimFullName(fullName) {
     return String(fullName || "").replace(/^\./, "");
 }
@@ -297,4 +287,30 @@ function normalizePath(filePath) {
         return "";
     }
     return path.resolve(String(filePath));
+}
+
+function protoManifest(resolved) {
+    return {
+        identity: {
+            schema: "holon/v1",
+            uuid: resolved.identity.uuid || "",
+            given_name: resolved.identity.given_name || "",
+            family_name: resolved.identity.family_name || "",
+            motto: resolved.identity.motto || "",
+            composer: resolved.identity.composer || "",
+            status: resolved.identity.status || "",
+            born: resolved.identity.born || "",
+            aliases: Array.isArray(resolved.identity.aliases) ? resolved.identity.aliases : [],
+        },
+        lang: resolved.identity.lang || "",
+        kind: resolved.kind || "",
+        build: {
+            runner: resolved.build_runner || "",
+            main: resolved.build_main || "",
+        },
+        artifacts: {
+            binary: resolved.artifact_binary || "",
+            primary: resolved.artifact_primary || "",
+        },
+    };
 }

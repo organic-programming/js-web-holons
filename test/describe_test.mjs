@@ -40,7 +40,7 @@ message PingResponse {
 
 const HOLON_PROTO = `syntax = "proto3";
 
-package holonmeta.test.v1;
+package holons.test.v1;
 
 option (holons.v1.manifest) = {
   identity: {
@@ -79,8 +79,9 @@ describe("describe", () => {
                 path.join(root, "protos"),
             );
 
-            assert.equal(response.slug, "echo-server");
-            assert.equal(response.motto, "Reply precisely.");
+            assert.equal(response.manifest.identity.given_name, "Echo");
+            assert.equal(response.manifest.identity.family_name, "Server");
+            assert.equal(response.manifest.identity.motto, "Reply precisely.");
             assert.equal(response.services.length, 1);
             assert.equal(response.services[0].name, "echo.v1.Echo");
             assert.equal(response.services[0].methods[0].name, "Ping");
@@ -107,8 +108,8 @@ describe("describe", () => {
 
         try {
             const response = await client.invoke(holonDescribe.HOLON_META_METHOD, {});
-            assert.equal(response.slug, "echo-server");
-            assert.equal(response.motto, "Reply precisely.");
+            assert.equal(response.manifest.identity.given_name, "Echo");
+            assert.equal(response.manifest.identity.motto, "Reply precisely.");
             assert.deepEqual(response.services.map((service) => service.name), ["echo.v1.Echo"]);
         } finally {
             client.close();
@@ -124,8 +125,8 @@ describe("describe", () => {
                 path.join(root, "protos"),
             );
 
-            assert.equal(response.slug, "echo-server");
-            assert.equal(response.motto, "Reply precisely.");
+            assert.equal(response.manifest.identity.given_name, "Echo");
+            assert.equal(response.manifest.identity.motto, "Reply precisely.");
             assert.deepEqual(response.services, []);
         } finally {
             removeDir(root);
